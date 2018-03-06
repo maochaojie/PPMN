@@ -1,0 +1,23 @@
+# The train/test net protocol buffer definition
+net: "experiments_py_lomo/cuhk03/lomo/train_val_lomo.prototxt"
+# test_iter specifies how many forward passes the test should carry out.
+# In the case of MNIST, we have test batch size 100 and 100 test iterations,
+# covering the full 10,000 testing images.
+test_iter: 1000
+# Carry out testing every 500 training iterations.
+test_interval: 2000
+test_initialization:true
+# The base learning rate, momentum and the weight decay of the network.
+base_lr: 0.04
+lr_policy: "poly"
+power: 0.5
+max_iter:30000
+momentum: 0.9
+weight_decay: 0.0002
+snapshot: 5000
+# Display every 100 iterations
+display: 10
+# snapshot intermediate results
+snapshot_prefix: "models/lomo/cuhk03/lomo/30000_set02"
+# solver mode: CPU or GPU
+solver_mode: GPU

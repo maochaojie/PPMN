@@ -14,9 +14,9 @@ layer {
   # top: "label_pID"
   #top: "clip_markers"
   python_param {
-    module: "viper_SeqIn_layer"
+    module: "cuhk03_SeqIn_layer"
     layer: "videoReadTrain"
-    param_str:"{\'Train_batch_size\':\'800\',\'multylabel\':\'False\',\'deep\':\'False\',\'lomo\':\'False\',\'lomo_dim\':\'26960\',\'map_lomo\':\'True\',\'RGB\':\'True\',\'HSV\':\'True\',\'SILTP\':\'True\',\'data_dir\':\'data_aug\',\'lomo_dir\':\'lomo_map\',\'block_size\':\'8\',\'block_step\':\'4\',\'bin_size\':\'8\',\'pad_size\':\'2\'}"
+    param_str:"{\'Train_batch_size\':\'800\',\'channels\':\'3\', \'height\':\'160\',\'width\':\'80\',\'path_root\':\'./\', \'file_list\':\'split/sin_img_ctm/set02_train_noval_pair.txt\',\'multylabel\':\'False\',\'deep\':\'False\',\'lomo\':\'False\',\'lomo_dim\':\'26960\',\'map_lomo\':\'True\',\'RGB\':\'True\',\'HSV\':\'True\',\'SILTP\':\'True\',\'data_dir\':\'data_aug\',\'lomo_dir\':\'lomo_map\',\'block_size\':\'8\',\'block_step\':\'4\',\'bin_size\':\'8\',\'pad_size\':\'2\'}"
   }
   include: { phase: TRAIN }
 }
@@ -35,9 +35,9 @@ layer {
   # top: "label_pID"
   #top: "clip_markers"
   python_param {
-    module: "viper_SeqIn_layer"
+    module: "cuhk03_SeqIn_layer"
     layer: "videoReadTest"
-    param_str:"{\'Test_batch_size\':\'10\',\'multylabel\':\'False\',\'deep\':\'False\',\'lomo\':\'False\',\'lomo_dim\':\'26960\',\'map_lomo\':\'True\',\'RGB\':\'True\',\'HSV\':\'True\',\'SILTP\':\'True\',\'data_dir\':\'data_aug\',\'lomo_dir\':\'lomo_map\',\'block_size\':\'8\',\'block_step\':\'4\',\'bin_size\':\'8\',\'pad_size\':\'2\'}"
+    param_str:"{\'Test_batch_size\':\'10\',\'channels\':\'3\', \'height\':\'160\',\'width\':\'80\',\'path_root\':\'./\', \'file_list\':\'split/sin_img_ctm/set02_test_noval_pair.txt\',\'multylabel\':\'False\',\'deep\':\'False\',\'lomo\':\'False\',\'lomo_dim\':\'26960\',\'map_lomo\':\'True\',\'RGB\':\'True\',\'HSV\':\'True\',\'SILTP\':\'True\',\'data_dir\':\'data_aug\',\'lomo_dir\':\'lomo_map\',\'block_size\':\'8\',\'block_step\':\'4\',\'bin_size\':\'8\',\'pad_size\':\'2\'}"
   }
   include: { phase: TEST  }
 }

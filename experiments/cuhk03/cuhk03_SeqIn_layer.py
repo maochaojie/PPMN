@@ -182,78 +182,6 @@ def readlistFromFileToCache(video_list,height,width):
     print total
     return [video_cache_dict,video_order]
 
-
-
-
-#Train_batch_size = 100
-#Test_batch_size = 10
-#Train_frames_l = 1 #SEQUENCE LENGTH
-#Test_frames_l = 1
-chnnels = 3
-height = 160
-width = 80
-path_root = './'
-
-TrainVideolist ='dataset/cuhk03/split/sin_img_lomo/set02_train_noval_pair.txt'
-TestVideolist ='dataset/cuhk03/split/sin_img_lomo/set02_test_noval_pair.txt'
-# TrainVideolistFlow =''
-# TestVideolistFlow =''
-# affine = True
-#multylabel = False
-#balance = True #if True then seq-seq;else then img-seq
-# Numlist = 'dataset/cuhk03_detect/split/totalNumListDict.txt'
-
-
-
-
-
-# class videoReadTrain_flow(videoRead):
-
-#   def initialize(self):
-#     params = eval(self.param_str)
-#     Train_batch_size = int(params['Train_batch_size'])
-#     multylabel = bool(params['multylabel']=='True')
-#     #print Train_batch_size
-#     self.train_or_test = 'train'
-#     self.flow = True
-#     self.buffer_size = Train_batch_size  #num videos processed per batch
-#     self.N = self.buffer_size
-#     self.idx = 0
-#     self.channels = chnnels
-#     self.height = height
-#     self.width = width
-#     self.path_to_images = path_root  # the pre path to the datasets
-#     video_dict = readlistFromFile(TrainVideolistFlow,Numlist,self.height,self.width)
-#     self.video_dict = video_dict[0]
-#     self.video_order = video_dict[1]
-#     self.num_videos = len(self.video_dict)
-#     self.multylabel = multylabel
-
-# class videoReadTest_flow(videoRead):
-
-#   def initialize(self):
-#     params = eval(self.param_str)
-#     Test_batch_size = int(params['Test_batch_size'])
-#     Test_frames_l = int(params['Test_frames_l'])
-#     multylabel = bool(params['multylabel']=='True')
-#     balance = bool(params['balance']=='True')
-#     self.train_or_test = 'train'
-#     self.flow = True
-#     self.buffer_size = Test_batch_size  #num videos processed per batch
-#     self.frames = Test_frames_l   #length of processed clip
-#     self.N = self.buffer_size*self.frames
-#     self.idx = 0
-#     self.channels = chnnels
-#     self.height = height
-#     self.width = width
-#     self.path_to_images = path_root  # the pre path to the datasets
-#     video_dict = readlistFromFile(TestVideolistFlow,Numlist,self.frames,balance,self.height,self.width,affine)
-#     self.video_dict = video_dict[0]
-#     self.video_order = video_dict[1]
-#     self.num_videos = len(self.video_dict)
-#     self.multylabel = multylabel
-#     self.affine = affine
-
 class videoReadTrain(videoRead):
 
   def initialize(self):
@@ -277,6 +205,14 @@ class videoReadTrain(videoRead):
     map_lomo['SILTP_para'] = [bool(params['SILTP']=='True'),16]
     map_lomo['data_dir'] = params['data_dir']
     map_lomo['lomo_dir'] = params['lomo_dir']
+    
+    chnnels = int(params['channels'])
+    height = int(params['height'])
+    width = int(params['width'])
+    path_root = params['path_root']
+    
+    TrainVideolist = params['file_list']
+    
 
     self.train_or_test = 'train'
     self.buffer_size = Train_batch_size  #num videos processed per batch
@@ -322,6 +258,14 @@ class videoReadTest(videoRead):
     map_lomo['SILTP_para'] = [bool(params['SILTP']=='True'),16]
     map_lomo['data_dir'] = params['data_dir']
     map_lomo['lomo_dir'] = params['lomo_dir']
+    
+    chnnels = int(params['channels'])
+    height = int(params['height'])
+    width = int(params['width'])
+    path_root = params['path_root']
+    
+    TestVideolist = params['file_list']
+    
     #print multylabel
     self.train_or_test = 'train'
     self.buffer_size = Test_batch_size  #num videos processed per batch
@@ -342,14 +286,4 @@ class videoReadTest(videoRead):
     self.lomo = lomo
     self.lomo_dim = lomo_dim
     self.map_lomo = map_lomo
-
-# def main():
-#     video_dict = readlistFromFileToCache(TestVideolist,160,80)
-#     print video_dict[1]
-#     print len(video_dict[1])
-#     print ('95651' in video_dict[1])
-
-# if __name__ == '__main__':
-#     main()
-
 

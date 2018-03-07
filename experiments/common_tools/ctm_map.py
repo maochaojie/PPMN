@@ -11,7 +11,7 @@ def channel_hist(img_channel, bin_size):
     w,h = img_channel.shape
     return hist/(w*h)
 
-def map_lomo_com(im,block_step,block_size,bin_size):
+def map_ctm_com(im,block_step,block_size,bin_size):
     h,w,c = im.shape
     map_height = h/block_step-1
     map_width = w/block_step-1

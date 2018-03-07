@@ -1,12 +1,12 @@
 name: "AlexNet"
-input: "data_map_lomo"
+input: "data_map_ctm"
 input_shape { 
     dim: 1
     dim: 64
     dim: 40
     dim: 20
 }
-input: "data_map_lomo_p"
+input: "data_map_ctm_p"
 input_shape { 
     dim: 1
     dim: 64
@@ -18,7 +18,7 @@ input_shape {
 layer {
   name: "conv1"
   type: "Convolution"
-  bottom: "data_map_lomo"
+  bottom: "data_map_ctm"
   top: "conv1"
   param {
     name: "conv1_w"
@@ -152,7 +152,7 @@ layer {
 layer {
   name: "conv1_p"
   type: "Convolution"
-  bottom: "data_map_lomo_p"
+  bottom: "data_map_ctm_p"
   top: "conv1_p"
   param {
     name: "conv1_w"
@@ -288,25 +288,25 @@ layer {
 ###########################################################################################
 
 layer {
-  name: "fea-all_lomo"
+  name: "fea-all_ctm"
   type: "Concat"
   bottom: "conv3"
   bottom: "conv3_p"
-  top: "fea-all_lomo"
+  top: "fea-all_ctm"
 }
 
 layer {
-  name: "conv-sm/1x1_lomo"
+  name: "conv-sm/1x1_ctm"
   type: "Convolution"
-  bottom: "fea-all_lomo"
-  top: "conv-sm/1x1_lomo"
+  bottom: "fea-all_ctm"
+  top: "conv-sm/1x1_ctm"
   param {
-    name: "w/1x1_lomo"
+    name: "w/1x1_ctm"
     lr_mult: 1
     decay_mult: 1
   }
   param {
-    name: "b/1x1_lomo"
+    name: "b/1x1_ctm"
     lr_mult: 2
     decay_mult: 0
   }
@@ -326,24 +326,24 @@ layer {
   }
 }
 layer {
-  name: "relu/1x1_lomo"
+  name: "relu/1x1_ctm"
   type: "ReLU"
-  bottom: "conv-sm/1x1_lomo"
-  top: "conv-sm/1x1_lomo"
+  bottom: "conv-sm/1x1_ctm"
+  top: "conv-sm/1x1_ctm"
 }
 
 layer {
-  name: "conv-sm/2x2_lomo"
+  name: "conv-sm/2x2_ctm"
   type: "Convolution"
-  bottom: "fea-all_lomo"
-  top: "conv-sm/2x2_lomo"
+  bottom: "fea-all_ctm"
+  top: "conv-sm/2x2_ctm"
   param {
-    name: "w/2x2_lomo"
+    name: "w/2x2_ctm"
     lr_mult: 1
     decay_mult: 1
   }
   param {
-    name: "b/2x2_lomo"
+    name: "b/2x2_ctm"
     lr_mult: 2
     decay_mult: 0
   }
@@ -363,24 +363,24 @@ layer {
   }
 }
 layer {
-  name: "relu/2x2_lomo"
+  name: "relu/2x2_ctm"
   type: "ReLU"
-  bottom: "conv-sm/2x2_lomo"
-  top: "conv-sm/2x2_lomo"
+  bottom: "conv-sm/2x2_ctm"
+  top: "conv-sm/2x2_ctm"
 }
 
 layer {
-  name: "conv-sm/4x4_lomo"
+  name: "conv-sm/4x4_ctm"
   type: "Convolution"
-  bottom: "fea-all_lomo"
-  top: "conv-sm/4x4_lomo"
+  bottom: "fea-all_ctm"
+  top: "conv-sm/4x4_ctm"
   param {
-    name: "w/4x4_lomo"
+    name: "w/4x4_ctm"
     lr_mult: 1
     decay_mult: 1
   }
   param {
-    name: "b/4x4_lomo"
+    name: "b/4x4_ctm"
     lr_mult: 2
     decay_mult: 0
   }
@@ -400,35 +400,35 @@ layer {
   }
 }
 layer {
-  name: "relu/4x4_lomo"
+  name: "relu/4x4_ctm"
   type: "ReLU"
-  bottom: "conv-sm/4x4_lomo"
-  top: "conv-sm/4x4_lomo"
+  bottom: "conv-sm/4x4_ctm"
+  top: "conv-sm/4x4_ctm"
 }
 
 
 #####similiarity learning ##########
 layer {
-  name: "sm-all_lomo"
+  name: "sm-all_ctm"
   type: "Concat"
-  bottom: "conv-sm/1x1_lomo"
-  bottom: "conv-sm/2x2_lomo"
-  bottom: "conv-sm/4x4_lomo"
-  top: "sm-all_lomo"
+  bottom: "conv-sm/1x1_ctm"
+  bottom: "conv-sm/2x2_ctm"
+  bottom: "conv-sm/4x4_ctm"
+  top: "sm-all_ctm"
 }
 
 layer {
-  name: "conv4-sm_lomo"
+  name: "conv4-sm_ctm"
   type: "Convolution"
-  bottom: "sm-all_lomo"
-  top: "conv4-sm_lomo"
+  bottom: "sm-all_ctm"
+  top: "conv4-sm_ctm"
   param {
-    name: "conv4_w_lomo"
+    name: "conv4_w_ctm"
     lr_mult: 1
     decay_mult: 1
   }
   param {
-    name: "conv4_b_lomo"
+    name: "conv4_b_ctm"
     lr_mult: 2
     decay_mult: 0
   }
@@ -447,17 +447,17 @@ layer {
   }
 }
 layer {
-  name: "relu4_lomo"
+  name: "relu4_ctm"
   type: "ReLU"
-  bottom: "conv4-sm_lomo"
-  top: "conv4-sm_lomo"
+  bottom: "conv4-sm_ctm"
+  top: "conv4-sm_ctm"
 }
 
 layer {
-  name: "pool5_lomo"
+  name: "pool5_ctm"
   type: "Pooling"
-  bottom: "conv4-sm_lomo"
-  top: "pool5_lomo"
+  bottom: "conv4-sm_ctm"
+  top: "pool5_ctm"
   pooling_param {
     pool: MAX
     kernel_size: 3
@@ -465,17 +465,17 @@ layer {
   }
 }
 layer {
-  name: "fc6-sm_lomo"
+  name: "fc6-sm_ctm"
   type: "InnerProduct"
-  bottom: "pool5_lomo"
-  top: "fc6-sm_lomo"
+  bottom: "pool5_ctm"
+  top: "fc6-sm_ctm"
   param {
-    name:"fc6_w_lomo"
+    name:"fc6_w_ctm"
     lr_mult: 1
     decay_mult: 1
   }
   param {
-    name:"fc6_b_lomo"
+    name:"fc6_b_ctm"
     lr_mult: 2
     decay_mult: 0
   }
@@ -492,32 +492,32 @@ layer {
   }
 }
 layer {
-  name: "relu6-sm_lomo"
+  name: "relu6-sm_ctm"
   type: "ReLU"
-  bottom: "fc6-sm_lomo"
-  top: "fc6-sm_lomo"
+  bottom: "fc6-sm_ctm"
+  top: "fc6-sm_ctm"
 }
 layer {
-  name: "drop6-sm_lomo"
+  name: "drop6-sm_ctm"
   type: "Dropout"
-  bottom: "fc6-sm_lomo"
-  top: "fc6-sm_lomo"
+  bottom: "fc6-sm_ctm"
+  top: "fc6-sm_ctm"
   dropout_param {
     dropout_ratio: 0.4
   }
 }
 layer {
-  name: "fc7-sm_lomo"
+  name: "fc7-sm_ctm"
   type: "InnerProduct"
-  bottom: "fc6-sm_lomo"
-  top: "fc7-sm_lomo"
+  bottom: "fc6-sm_ctm"
+  top: "fc7-sm_ctm"
   param {
-    name:"fc7_w_lomo"
+    name:"fc7_w_ctm"
     lr_mult: 1
     decay_mult: 1
   }
   param {
-    name:"fc7_b_lomo"
+    name:"fc7_b_ctm"
     lr_mult: 2
     decay_mult: 0
   }
@@ -534,16 +534,16 @@ layer {
   }
 }
 layer {
-  name: "relu7-sm_lomo"
+  name: "relu7-sm_ctm"
   type: "ReLU"
-  bottom: "fc7-sm_lomo"
-  top: "fc7-sm_lomo"
+  bottom: "fc7-sm_ctm"
+  top: "fc7-sm_ctm"
 }
 layer {
-  name: "drop7-sm_lomo"
+  name: "drop7-sm_ctm"
   type: "Dropout"
-  bottom: "fc7-sm_lomo"
-  top: "fc7-sm_lomo"
+  bottom: "fc7-sm_ctm"
+  top: "fc7-sm_ctm"
   dropout_param {
     dropout_ratio: 0.4
   }
@@ -551,10 +551,10 @@ layer {
 
 
 layer {
-  name: "fc7-all_lomo"
+  name: "fc7-all_ctm"
   type: "InnerProduct"
-  bottom: "fc7-sm_lomo"
-  top: "fc7-all_lomo"
+  bottom: "fc7-sm_ctm"
+  top: "fc7-all_ctm"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -581,6 +581,6 @@ layer {
 layer {
   name: "softmax_score"
   type: "Softmax"
-  bottom: "fc7-all_lomo"
+  bottom: "fc7-all_ctm"
   top: "softmax_score"
 }

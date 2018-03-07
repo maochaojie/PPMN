@@ -6,7 +6,7 @@ import os
 #import caffe
 
 from multiprocessing import Pool 
-sys.path.append('./experiments_py_lomo/common_tools')
+sys.path.append('./experiments/common_tools')
 from base_input_layer import videoRead
 from ProgressBar import *
 
@@ -16,8 +16,8 @@ def processList(filelistname,height,width):
     video_dict[videokey] = {}
     video_dict[videokey]['frames'] = []
     video_dict[videokey]['frames_p'] = []
-    video_dict[videokey]['lomo'] = []
-    video_dict[videokey]['lomo_p'] = []
+    video_dict[videokey]['ctm'] = []
+    video_dict[videokey]['ctm_p'] = []
 
     filename = filelistname.split(' ')[1]
     person_id = int(filename[-13:-9])
@@ -30,8 +30,8 @@ def processList(filelistname,height,width):
     
     video_dict[videokey]['frames_p'].append(filelistname.split(' ')[2])  # should verify
     
-    video_dict[videokey]['lomo'].append((filelistname.split(' ')[1][:-4]+'.npy').replace('data_aug','lomo_feature'))
-    video_dict[videokey]['lomo_p'].append((filelistname.split(' ')[2][:-4]+'.npy').replace('data_aug','lomo_feature'))
+    video_dict[videokey]['ctm'].append((filelistname.split(' ')[1][:-4]+'.npy').replace('data_aug','ctm_feature'))
+    video_dict[videokey]['ctm_p'].append((filelistname.split(' ')[2][:-4]+'.npy').replace('data_aug','ctm_feature'))
 
     video_dict[videokey]['reshape'] = (height, width)
     video_dict[videokey]['label'] = []
@@ -189,22 +189,22 @@ class videoReadTrain(videoRead):
     Train_batch_size = int(params['Train_batch_size'])
     multylabel = bool(params['multylabel']=='True')
     deep = bool(params['deep']=='True')
-    lomo = bool(params['lomo']=='True')
-    lomo_dim = int(params['lomo_dim'])
-    map_lomo = {}
-    map_lomo['flag'] =  bool(params['map_lomo']=='True')
-    map_lomo['block_size'] =  int(params['block_size'])
-    map_lomo['block_step'] =  int(params['block_step'])
-    map_lomo['bin_size'] =  int(params['bin_size'])
-    map_lomo['pad_size'] =  int(params['pad_size'])
-    map_lomo['tau'] =  0.3
-    map_lomo['R'] = 5
-    map_lomo['numPoints'] = 4
-    map_lomo['RGB_para'] = [bool(params['RGB']=='True'),8]
-    map_lomo['HSV_para'] = [bool(params['HSV']=='True'),8]
-    map_lomo['SILTP_para'] = [bool(params['SILTP']=='True'),16]
-    map_lomo['data_dir'] = params['data_dir']
-    map_lomo['lomo_dir'] = params['lomo_dir']
+    ctm = bool(params['ctm']=='True')
+    ctm_dim = int(params['ctm_dim'])
+    map_ctm = {}
+    map_ctm['flag'] =  bool(params['map_ctm']=='True')
+    map_ctm['block_size'] =  int(params['block_size'])
+    map_ctm['block_step'] =  int(params['block_step'])
+    map_ctm['bin_size'] =  int(params['bin_size'])
+    map_ctm['pad_size'] =  int(params['pad_size'])
+    map_ctm['tau'] =  0.3
+    map_ctm['R'] = 5
+    map_ctm['numPoints'] = 4
+    map_ctm['RGB_para'] = [bool(params['RGB']=='True'),8]
+    map_ctm['HSV_para'] = [bool(params['HSV']=='True'),8]
+    map_ctm['SILTP_para'] = [bool(params['SILTP']=='True'),16]
+    map_ctm['data_dir'] = params['data_dir']
+    map_ctm['ctm_dir'] = params['ctm_dir']
     
     chnnels = int(params['channels'])
     height = int(params['height'])
@@ -230,9 +230,9 @@ class videoReadTrain(videoRead):
     self.num_videos = len(self.video_order)
     self.multylabel = multylabel
     self.deep = deep
-    self.lomo = lomo
-    self.lomo_dim = lomo_dim
-    self.map_lomo = map_lomo
+    self.ctm = ctm
+    self.ctm_dim = ctm_dim
+    self.map_ctm = map_ctm
 
 class videoReadTest(videoRead):
 
@@ -241,23 +241,23 @@ class videoReadTest(videoRead):
     Test_batch_size = int(params['Test_batch_size'])
     multylabel = bool(params['multylabel']=='True')
     deep = bool(params['deep']=='True')
-    lomo = bool(params['lomo']=='True')
-    lomo_dim = int(params['lomo_dim'])
-    map_lomo = {}
-    map_lomo['flag'] =  bool(params['map_lomo']=='True')
-    map_lomo['block_size'] =  int(params['block_size'])
-    map_lomo['block_step'] =  int(params['block_step'])
-    map_lomo['bin_size'] =  int(params['bin_size'])
-    map_lomo['pad_size'] =  int(params['pad_size'])
-    map_lomo['tau'] =  0.3
-    map_lomo['R'] = 5
-    map_lomo['numPoints'] = 4
+    ctm = bool(params['ctm']=='True')
+    ctm_dim = int(params['ctm_dim'])
+    map_ctm = {}
+    map_ctm['flag'] =  bool(params['map_ctm']=='True')
+    map_ctm['block_size'] =  int(params['block_size'])
+    map_ctm['block_step'] =  int(params['block_step'])
+    map_ctm['bin_size'] =  int(params['bin_size'])
+    map_ctm['pad_size'] =  int(params['pad_size'])
+    map_ctm['tau'] =  0.3
+    map_ctm['R'] = 5
+    map_ctm['numPoints'] = 4
 
-    map_lomo['RGB_para'] = [bool(params['RGB']=='True'),8]
-    map_lomo['HSV_para'] = [bool(params['HSV']=='True'),8]
-    map_lomo['SILTP_para'] = [bool(params['SILTP']=='True'),16]
-    map_lomo['data_dir'] = params['data_dir']
-    map_lomo['lomo_dir'] = params['lomo_dir']
+    map_ctm['RGB_para'] = [bool(params['RGB']=='True'),8]
+    map_ctm['HSV_para'] = [bool(params['HSV']=='True'),8]
+    map_ctm['SILTP_para'] = [bool(params['SILTP']=='True'),16]
+    map_ctm['data_dir'] = params['data_dir']
+    map_ctm['ctm_dir'] = params['ctm_dir']
     
     chnnels = int(params['channels'])
     height = int(params['height'])
@@ -283,7 +283,7 @@ class videoReadTest(videoRead):
     self.num_videos = len(self.video_order)
     self.multylabel = multylabel
     self.deep = deep
-    self.lomo = lomo
-    self.lomo_dim = lomo_dim
-    self.map_lomo = map_lomo
+    self.ctm = ctm
+    self.ctm_dim = ctm_dim
+    self.map_ctm = map_ctm
 

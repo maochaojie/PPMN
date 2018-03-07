@@ -13,66 +13,66 @@ import random
 import os
 from multiprocessing import Pool
 from threading import Thread
-from lomo_map import *
+from ctm_map import *
 import pickle
 global DEBUG
 DEBUG = False
 
-def processImageCrop(im_info, transformer, deep, lomo, map_lomo, extractor):
+def processImageCrop(im_info, transformer, deep, ctm, map_ctm, extractor):
     
     im_path = im_info[0]
-    lomo_path = im_info[1]
-    #print lomo_path
+    ctm_path = im_info[1]
+    #print ctm_path
     im_reshape = im_info[2]
-    lomo_des = []
+    ctm_des = []
     processed_image = np.zeros((1,1))
-    map_lomo_fea = np.zeros((1,1))
-    if lomo == True:
-        lomo_des = np.load(lomo_path)
-    if deep == True or map_lomo['flag'] == True:
+    map_ctm_fea = np.zeros((1,1))
+    if ctm == True:
+        ctm_des = np.load(ctm_path)
+    if deep == True or map_ctm['flag'] == True:
         data_in = caffe.io.load_image(im_path)
         if (data_in.shape[0] < im_reshape[0]) | (data_in.shape[1] < im_reshape[1]):
             data_in = caffe.io.resize_image(data_in, im_reshape)
     if deep == True:
         processed_image = transformer.preprocess('data_in', data_in)
         # print processed_image.dtype
-    if map_lomo['flag'] == True:
-        map_lomo_path = im_path.replace(map_lomo['data_dir'],map_lomo['lomo_dir'])[:-4]+'.npy'
-        if os.path.isfile(map_lomo_path):
-            map_lomo_fea = np.load(map_lomo_path)
+    if map_ctm['flag'] == True:
+        map_ctm_path = im_path.replace(map_ctm['data_dir'],map_ctm['ctm_dir'])[:-4]+'.npy'
+        if os.path.isfile(map_ctm_path):
+            map_ctm_fea = np.load(map_ctm_path)
             # print 'load..'
         else:
-            map_lomo_folder = map_lomo_path.replace(map_lomo_path.split('/')[-1],'')
-            if not os.path.exists(map_lomo_folder):
-                os.makedirs(map_lomo_folder)
-            map_lomo_fea = extractor.extract_feature(im_path)
-            np.save(map_lomo_path, map_lomo_fea)
+            map_ctm_folder = map_ctm_path.replace(map_ctm_path.split('/')[-1],'')
+            if not os.path.exists(map_ctm_folder):
+                os.makedirs(map_ctm_folder)
+            map_ctm_fea = extractor.extract_feature(im_path)
+            np.save(map_ctm_path, map_ctm_fea)
         
     res_dic = {}
-    # print len(lomo_des)
-    res_dic['lomo']= lomo_des
-    res_dic['map_lomo']= map_lomo_fea
+    # print len(ctm_des)
+    res_dic['ctm']= ctm_des
+    res_dic['map_ctm']= map_ctm_fea
     
     if DEBUG:
-        print map_lomo_fea[0,:,:]
-        map_lom = cv2.resize(map_lomo_fea[0,:, :], (80, 160), interpolation=cv2.INTER_LINEAR)
+        print map_ctm_fea[0,:,:]
+        map_lom = cv2.resize(map_ctm_fea[0,:, :], (80, 160), interpolation=cv2.INTER_LINEAR)
         map_lom = map_lom.astype('uint8')
-        cv2.imshow('lomo',map_lom)
+        cv2.imshow('ctm',map_lom)
         cv2.waitKey(1000)
     res_dic['pro_img'] = processed_image
     return res_dic
 
 
 class ImageProcessorCrop(object):
-    def __init__(self, transformer, deep, lomo, map_lomo, extractor):
+    def __init__(self, transformer, deep, ctm, map_ctm, extractor):
         self.transformer = transformer
         self.deep = deep
-        self.lomo = lomo
-        self.map_lomo = map_lomo
+        self.ctm = ctm
+        self.map_ctm = map_ctm
         self.extractor = extractor
 
     def __call__(self, im_info):
-        return processImageCrop(im_info, self.transformer, self.deep, self.lomo, self.map_lomo, self.extractor)
+        return processImageCrop(im_info, self.transformer, self.deep, self.ctm, self.map_ctm, self.extractor)
 
 
 class sequenceGeneratorVideo(object):
@@ -88,8 +88,8 @@ class sequenceGeneratorVideo(object):
 		label_r = []
 		im_paths = []
 		im_paths_p = []
-		lomo_paths = []
-		lomo_paths_p = []
+		ctm_paths = []
+		ctm_paths_p = []
 		im_reshape = []
 		idx_list = []
 		load_cache_key = ''
@@ -117,20 +117,20 @@ class sequenceGeneratorVideo(object):
 			frames = []
 			frames.extend(video_dict[key]['frames'])
 			im_paths.extend(frames)
-			lomos = []
-			lomos.extend(video_dict[key]['lomo'])
-			lomo_paths.extend(lomos)
+			ctms = []
+			ctms.extend(video_dict[key]['ctm'])
+			ctm_paths.extend(ctms)
 
 			frames_p = []
 			frames_p.extend(video_dict[key]['frames_p'])
 			im_paths_p.extend(frames_p)
 
-			lomos_p = []
-			lomos_p.extend(video_dict[key]['lomo_p'])
-			lomo_paths_p.extend(lomos_p)
+			ctms_p = []
+			ctms_p.extend(video_dict[key]['ctm_p'])
+			ctm_paths_p.extend(ctms_p)
 
-		im_info = zip(im_paths, lomo_paths, im_reshape)
-		im_info_p = zip(im_paths_p, lomo_paths_p, im_reshape)
+		im_info = zip(im_paths, ctm_paths, im_reshape)
+		im_info_p = zip(im_paths_p, ctm_paths_p, im_reshape)
 
 		self.idx += self.buffer_size
 		# print self.idx
@@ -153,22 +153,22 @@ def advance_batch(result, sequence_generator, image_processor, pool):
     
     buffer_result = pool.map(image_processor, im_info)
     result['data'] = []
-    result['lomo'] = []
-    result['map_lomo'] = []
+    result['ctm'] = []
+    result['map_ctm'] = []
 
     for buf_ in buffer_result:
         result['data'].append(buf_['pro_img'])
-        result['lomo'].append(buf_['lomo'])
-        result['map_lomo'].append(buf_['map_lomo'])
+        result['ctm'].append(buf_['ctm'])
+        result['map_ctm'].append(buf_['map_ctm'])
     #print len(result['data'])
     buffer_result1 = pool.map(image_processor, im_info_p)
     result['data_p'] = []
-    result['lomo_p'] = []
-    result['map_lomo_p'] = []
+    result['ctm_p'] = []
+    result['map_ctm_p'] = []
     for buf_ in buffer_result1:
         result['data_p'].append(buf_['pro_img'])
-        result['lomo_p'].append(buf_['lomo'])
-        result['map_lomo_p'].append(buf_['map_lomo'])
+        result['ctm_p'].append(buf_['ctm'])
+        result['map_ctm_p'].append(buf_['map_ctm'])
     
     result['label'] = label_r
 
@@ -197,11 +197,11 @@ class videoRead(caffe.Layer):
         self.video_cache_dict = {}
         self.video_order = []
         self.num_videos = len(self.video_order)
-        self.lomo = False # preproc the data in affine style
-        self.lomo_dim = 26960 
+        self.ctm = False # preproc the data in affine style
+        self.ctm_dim = 26960 
         self.multylabel = False
         self.deep = True
-        self.map_lomo = {}
+        self.map_ctm = {}
 
     def setup(self, bottom, top):
         random.seed(10)
@@ -221,16 +221,16 @@ class videoRead(caffe.Layer):
         self.transformer.set_channel_swap('data_in', (2, 1, 0))
         self.transformer.set_transpose('data_in', (2, 0, 1))
         
-        self.extractor = feature_extractor(RGB_para = self.map_lomo['RGB_para'],HSV_para=self.map_lomo['HSV_para'],SILTP_para=self.map_lomo['SILTP_para'],\
-                                          block_size = self.map_lomo['block_size'], block_step = self.map_lomo['block_step'], pad_size = self.map_lomo['pad_size'], \
-                                          tau = self.map_lomo['tau'], R = self.map_lomo['R'], numPoints = self.map_lomo['numPoints'])
+        self.extractor = feature_extractor(RGB_para = self.map_ctm['RGB_para'],HSV_para=self.map_ctm['HSV_para'],SILTP_para=self.map_ctm['SILTP_para'],\
+                                          block_size = self.map_ctm['block_size'], block_step = self.map_ctm['block_step'], pad_size = self.map_ctm['pad_size'], \
+                                          tau = self.map_ctm['tau'], R = self.map_ctm['R'], numPoints = self.map_ctm['numPoints'])
 
         self.thread_result = {}
         self.thread = None
         pool_size = 24
         
         
-        self.image_processor = ImageProcessorCrop(self.transformer, self.deep, self.lomo, self.map_lomo, self.extractor)
+        self.image_processor = ImageProcessorCrop(self.transformer, self.deep, self.ctm, self.map_ctm, self.extractor)
         self.sequence_generator = sequenceGeneratorVideo(self.buffer_size, self.num_videos, self.video_cache_dict, self.video_order)
 
         self.pool = Pool(processes=pool_size, maxtasksperchild = 40)
@@ -240,19 +240,19 @@ class videoRead(caffe.Layer):
         self.top_names = []
         if self.deep == True:
             self.top_names.extend(['data', 'data_p']) 
-        if self.lomo == True:
-            self.top_names.extend(['data_lomo','data_lomo_p'])
-        if self.map_lomo['flag'] == True:
-            self.top_names.extend(['data_map_lomo','data_map_lomo_p'])
-            map_width = (self.width+2*self.map_lomo['pad_size'])/self.map_lomo['block_step']-1
-            map_height = (self.height+2*self.map_lomo['pad_size'])/self.map_lomo['block_step']-1
+        if self.ctm == True:
+            self.top_names.extend(['data_ctm','data_ctm_p'])
+        if self.map_ctm['flag'] == True:
+            self.top_names.extend(['data_map_ctm','data_map_ctm_p'])
+            map_width = (self.width+2*self.map_ctm['pad_size'])/self.map_ctm['block_step']-1
+            map_height = (self.height+2*self.map_ctm['pad_size'])/self.map_ctm['block_step']-1
             map_channels = 0
-            if self.map_lomo['RGB_para'][0]:
-                map_channels += self.map_lomo['RGB_para'][1]*self.channels
-            if self.map_lomo['HSV_para'][0]:
-                map_channels += self.map_lomo['HSV_para'][1]*self.channels
-            if self.map_lomo['SILTP_para'][0]:
-                map_channels += self.map_lomo['SILTP_para'][1]
+            if self.map_ctm['RGB_para'][0]:
+                map_channels += self.map_ctm['RGB_para'][1]*self.channels
+            if self.map_ctm['HSV_para'][0]:
+                map_channels += self.map_ctm['HSV_para'][1]*self.channels
+            if self.map_ctm['SILTP_para'][0]:
+                map_channels += self.map_ctm['SILTP_para'][1]
 
             
         self.top_names.extend(['label'])
@@ -270,9 +270,9 @@ class videoRead(caffe.Layer):
                 shape = (self.N, self.channels, self.height, self.width)
             elif name == 'label' or name == 'label_ID' or name == 'label_pID':
                 shape = (self.N,)
-            elif name == 'data_lomo' or name == 'data_lomo_p':
-                shape = (self.N, self.lomo_dim)
-            elif name == 'data_map_lomo' or name == 'data_map_lomo_p':
+            elif name == 'data_ctm' or name == 'data_ctm_p':
+                shape = (self.N, self.ctm_dim)
+            elif name == 'data_map_ctm' or name == 'data_map_ctm_p':
                 shape = (self.N, map_channels, map_height, map_width)
             top[top_index].reshape(*shape)
 
@@ -286,40 +286,40 @@ class videoRead(caffe.Layer):
         # print self.thread_result.keys()
         # rearrange the data: The LSTM takes inputs as [video0_frame0, video1_frame0,...] but the data is currently arranged as [video0_frame0, video0_frame1, ...]
         new_result_data = self.thread_result['data']
-        new_result_lomo = self.thread_result['lomo']
-        new_result_map_lomo = self.thread_result['map_lomo']
+        new_result_ctm = self.thread_result['ctm']
+        new_result_map_ctm = self.thread_result['map_ctm']
         new_result_data_p = self.thread_result['data_p']
-        new_result_lomo_p = self.thread_result['lomo_p']
-        new_result_map_lomo_p = self.thread_result['map_lomo_p']
+        new_result_ctm_p = self.thread_result['ctm_p']
+        new_result_map_ctm_p = self.thread_result['map_ctm_p']
         new_result_label = self.thread_result['label']
         # for ii in range(self.buffer_size):
         #     old_idx = ii
         #     new_idx = ii
         #     new_result_data[new_idx] = self.thread_result['data'][old_idx]
         #     new_result_data_p[new_idx] = self.thread_result['data_p'][old_idx]
-        #     new_result_lomo[new_idx] = self.thread_result['lomo'][old_idx]
-        #     new_result_lomo_p[new_idx] = self.thread_result['lomo_p'][old_idx]
+        #     new_result_ctm[new_idx] = self.thread_result['ctm'][old_idx]
+        #     new_result_ctm_p[new_idx] = self.thread_result['ctm_p'][old_idx]
         #     new_result_label[new_idx] = self.thread_result['label'][old_idx]
         label_array = np.array(new_result_label)
         for top_index, name in zip(range(len(top)), self.top_names):
             if name == 'data':
                 for i in range(self.N):
                     top[top_index].data[i, ...] = new_result_data[i]
-            elif name == 'data_lomo':
+            elif name == 'data_ctm':
                 for i in range(self.N):
-                    top[top_index].data[i, ...] = new_result_lomo[i]
-            elif name == 'data_map_lomo':
+                    top[top_index].data[i, ...] = new_result_ctm[i]
+            elif name == 'data_map_ctm':
                 for i in range(self.N):
-                    top[top_index].data[i, ...] = new_result_map_lomo[i]
+                    top[top_index].data[i, ...] = new_result_map_ctm[i]
             elif name == 'data_p':
                 for i in range(self.N):
                     top[top_index].data[i, ...] = new_result_data_p[i]
-            elif name == 'data_lomo_p':
+            elif name == 'data_ctm_p':
                 for i in range(self.N):
-                    top[top_index].data[i, ...] = new_result_lomo_p[i]
-            elif name == 'data_map_lomo_p':
+                    top[top_index].data[i, ...] = new_result_ctm_p[i]
+            elif name == 'data_map_ctm_p':
                 for i in range(self.N):
-                    top[top_index].data[i, ...] = new_result_map_lomo_p[i]
+                    top[top_index].data[i, ...] = new_result_map_ctm_p[i]
             elif name == 'label' :
                 top[top_index].data[...] = label_array[:,0]
                 #print label_array[:,0]

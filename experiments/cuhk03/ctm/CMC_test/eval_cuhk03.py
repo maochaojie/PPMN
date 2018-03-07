@@ -251,12 +251,12 @@ def main():
     map_ctm['SILTP_para'] = [True, 16]
 
     CMC_DIC = {}
-    for iter_num in range(5000, 35000, 5000):
+    for iter_num in range(5000, 10000, 5000):
         cmc_list=[]
         for set_no in test_list:
             #init net
             MODEL_FILE = './experiments/cuhk03/ctm/deploy_ctm.prototxt'
-            PRETRAINED = './models/ctm/cuhk03/ctm/30000_set02_iter_%d.caffemodel'%iter_num
+            PRETRAINED = './models/cuhk03/ctm/30000_set02_iter_%d.caffemodel'%iter_num
             net = None
             net = caffe.Classifier(MODEL_FILE, PRETRAINED,caffe.TEST)
             #caculate CMC

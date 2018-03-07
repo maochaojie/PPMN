@@ -1,6 +1,6 @@
 # The train/test net protocol buffer definition
 # net: "experiments_py_lomo/cuhk03_detect/lomo_assp_fusion/train_val.prototxt"
-net: "experiments_py_lomo/cuhk03/lomo_assp_fusion/train_val_twoflow_fusion.prototxt"
+net: "experiments/cuhk03/lomo_mc_ppmn/train_val_mc_ppmn.prototxt"
 # test_iter specifies how many forward passes the test should carry out.
 # In the case of MNIST, we have test batch size 100 and 100 test iterations,
 # covering the full 10,000 testing images.
@@ -19,6 +19,6 @@ snapshot: 2000
 # Display every 100 iterations
 display: 200
 # snapshot intermediate results
-snapshot_prefix: "models/lomo/cuhk03/lomo_assp_fusion/20000_set02"
+snapshot_prefix: "models/cuhk03/mc_ppmn/20000_set02"
 # solver mode: CPU or GPU
 solver_mode: GPU

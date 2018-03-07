@@ -9,9 +9,9 @@ import sys
 sys.path.insert(0, caffe_root + 'python')
 import caffe
 import numpy as np
-commontool_root = 'experiments_py_lomo/common_tools'
+commontool_root = 'experiments/common_tools'
 sys.path.insert(0,commontool_root)
-from lomo_map import *
+from ctm_map import *
 
 def readList(list_name): 
     import random
@@ -50,7 +50,7 @@ def readList(list_name):
     else:
         return probes,gallerys
 
-def generateScoreList(net,probes,gallerys,map_lomo, deep = True):
+def generateScoreList(net,probes,gallerys,map_ctm, deep = True):
     if deep==True:
         transformer = caffe.io.Transformer({'data': (net.blobs['data'].data.shape)})
         transformer.set_transpose('data', (2,0,1))
@@ -58,10 +58,10 @@ def generateScoreList(net,probes,gallerys,map_lomo, deep = True):
         transformer.set_raw_scale('data', 255)  # the reference model operates on images in [0,255] range instead of [0,1]
         transformer.set_channel_swap('data', (2,1,0))  # the reference model has channels in BGR order instead of RGB
         N,C,H,W=net.blobs['data'].data.shape
-    if map_lomo['flag'] == True:
-        extractor = feature_extractor(RGB_para = map_lomo['RGB_para'],HSV_para=map_lomo['HSV_para'],SILTP_para=map_lomo['SILTP_para'],\
-                                          block_size = map_lomo['block_size'], block_step = map_lomo['block_step'], pad_size = map_lomo['pad_size'], \
-                                          tau = map_lomo['tau'], R = map_lomo['R'], numPoints = map_lomo['numPoints'])
+    if map_ctm['flag'] == True:
+        extractor = feature_extractor(RGB_para = map_ctm['RGB_para'],HSV_para=map_ctm['HSV_para'],SILTP_para=map_ctm['SILTP_para'],\
+                                          block_size = map_ctm['block_size'], block_step = map_ctm['block_step'], pad_size = map_ctm['pad_size'], \
+                                          tau = map_ctm['tau'], R = map_ctm['R'], numPoints = map_ctm['numPoints'])
     scoreList=[]
 
     from time import clock
@@ -73,33 +73,33 @@ def generateScoreList(net,probes,gallerys,map_lomo, deep = True):
     check = True
     for galleryIdx in range(galleryLen):
         galleryName=gallerys[galleryIdx]
-        if map_lomo['flag'] == True:
-            map_lomo_path = galleryName.replace(map_lomo['data_dir'],map_lomo['lomo_dir'])[:-4]+'.npy'
-            # print map_lomo_path
-            if os.path.isfile(map_lomo_path):
-                map_lomo_fea = np.load(map_lomo_path)
+        if map_ctm['flag'] == True:
+            map_ctm_path = galleryName.replace(map_ctm['data_dir'],map_ctm['ctm_dir'])[:-4]+'.npy'
+            # print map_ctm_path
+            if os.path.isfile(map_ctm_path):
+                map_ctm_fea = np.load(map_ctm_path)
             else:
-                map_lomo_fea = extractor.extract_feature(galleryName)
-                map_lomo_folder = map_lomo_path.replace(map_lomo_path.split('/')[-1],'')
-                if not os.path.exists(map_lomo_folder):
-                    os.makedirs(map_lomo_folder)
-                np.save(map_lomo_path, map_lomo_fea)
+                map_ctm_fea = extractor.extract_feature(galleryName)
+                map_ctm_folder = map_ctm_path.replace(map_ctm_path.split('/')[-1],'')
+                if not os.path.exists(map_ctm_folder):
+                    os.makedirs(map_ctm_folder)
+                np.save(map_ctm_path, map_ctm_fea)
             if check:
-                C_lomo,H_lomo,W_lomo = map_lomo_fea.shape
+                C_ctm,H_ctm,W_ctm = map_ctm_fea.shape
                 check = False
         data_in = np.zeros((1,1))
         if deep == True:
             data_in = transformer.preprocess('data', caffe.io.load_image(galleryName))
-        galleryLomoList.append(map_lomo_fea)
+        galleryLomoList.append(map_ctm_fea)
         galleryImgList.append(data_in)
         galleryIdx+=1
-    print [C_lomo,H_lomo,W_lomo]
+    print [C_ctm,H_ctm,W_ctm]
     #galleryData and probeData
-    if map_lomo['flag'] == True:
+    if map_ctm['flag'] == True:
         galleryLomo=np.asarray(galleryLomoList)
-        probeLomo=np.zeros((galleryLen,C_lomo,H_lomo,W_lomo))
-        net.blobs['data_map_lomo'].reshape(galleryLen,C_lomo,H_lomo,W_lomo)
-        net.blobs['data_map_lomo_p'].reshape(galleryLen,C_lomo,H_lomo,W_lomo)
+        probeLomo=np.zeros((galleryLen,C_ctm,H_ctm,W_ctm))
+        net.blobs['data_map_ctm'].reshape(galleryLen,C_ctm,H_ctm,W_ctm)
+        net.blobs['data_map_ctm_p'].reshape(galleryLen,C_ctm,H_ctm,W_ctm)
     if deep == True:
         galleryImg=np.asarray(galleryImgList)
         probeImg=np.zeros((galleryLen,C,H,W))
@@ -113,22 +113,22 @@ def generateScoreList(net,probes,gallerys,map_lomo, deep = True):
     for probeIdx in range(len(probes)):
         probeName=probes[probeIdx]
         probeData = {}
-        if map_lomo['flag'] == True:
-            map_lomo_path = probeName.replace(map_lomo['data_dir'],map_lomo['lomo_dir'])[:-4]+'.npy'
-            if os.path.isfile(map_lomo_path):
-                map_lomo_fea = np.load(map_lomo_path)
+        if map_ctm['flag'] == True:
+            map_ctm_path = probeName.replace(map_ctm['data_dir'],map_ctm['ctm_dir'])[:-4]+'.npy'
+            if os.path.isfile(map_ctm_path):
+                map_ctm_fea = np.load(map_ctm_path)
             else:
-                map_lomo_fea = extractor.extract_feature(probeName)
-                map_lomo_folder = map_lomo_path.replace(map_lomo_path.split('/')[-1],'')
-                if not os.path.exists(map_lomo_folder):
-                    os.makedirs(map_lomo_folder)
-                np.save(map_lomo_path, map_lomo_fea)
+                map_ctm_fea = extractor.extract_feature(probeName)
+                map_ctm_folder = map_ctm_path.replace(map_ctm_path.split('/')[-1],'')
+                if not os.path.exists(map_ctm_folder):
+                    os.makedirs(map_ctm_folder)
+                np.save(map_ctm_path, map_ctm_fea)
             if check:
-                C_lomo,H_lomo,W_lomo = map_lomo_fea.shape
-            probeData['map_lomo'] = map_lomo_fea
-            probeLomo[:,:,:,:]=probeData['map_lomo']
-            net.blobs['data_map_lomo'].data[:] = probeLomo
-            net.blobs['data_map_lomo_p'].data[:] = galleryLomo
+                C_ctm,H_ctm,W_ctm = map_ctm_fea.shape
+            probeData['map_ctm'] = map_ctm_fea
+            probeLomo[:,:,:,:]=probeData['map_ctm']
+            net.blobs['data_map_ctm'].data[:] = probeLomo
+            net.blobs['data_map_ctm_p'].data[:] = galleryLomo
         if deep == True:
             probeData['img'] = transformer.preprocess('data', caffe.io.load_image(probeName))
             probeImg[:,:,:,:]=probeData['img']
@@ -143,7 +143,7 @@ def generateScoreList(net,probes,gallerys,map_lomo, deep = True):
         #get output score
         # outScore.extends(net.blobs['softmax_score'].data[:,(0,1)])    #softmax_score[0] and softmax_score[1]
         
-        outScore = net.blobs['softmax_score_flow'].data[:,(0,1)]#+net.blobs['softmax_score_lomo'].data[:,(0,1)]   #softmax_score[0] and softmax_score[1]
+        outScore = net.blobs['softmax_score_flow'].data[:,(0,1)]#+net.blobs['softmax_score_ctm'].data[:,(0,1)]   #softmax_score[0] and softmax_score[1]
     # print outScore.shape
         score_sum=np.exp(outScore[:,0]*1.0)+np.exp(outScore[:,1]*1.0)
         similarScore=outScore[:,1]#np.exp(outScore[:,1]*1.0)/score_sum
@@ -161,7 +161,7 @@ def generateScoreList(net,probes,gallerys,map_lomo, deep = True):
     print('\r  Processing %dx%d pairs cost %f second time'%(len(probes),len(gallerys),(finish-start)))
     return scoreList,predictLists
 
-def calCMC(net,set_no,map_lomo,deep=True,rand_times=10):
+def calCMC(net,set_no,map_ctm,deep=True,rand_times=10):
     from cmc import evaluateCMC
     DATA_DIR= 'dataset/cuhk03/'
     list_name=DATA_DIR+'exp_set/set%02d_test_noval.txt'%(set_no)
@@ -171,7 +171,7 @@ def calCMC(net,set_no,map_lomo,deep=True,rand_times=10):
     for i in range(rand_times):
         print 'Round %d with rand list:'%i
         probes,gallerys=readList(list_name)
-        scoreList,predictLists=generateScoreList(net,probes,gallerys,map_lomo,deep=deep)
+        scoreList,predictLists=generateScoreList(net,probes,gallerys,map_ctm,deep=deep)
         gtLabels=range(len(probes))
         cmc=evaluateCMC(gtLabels,predictLists)
         cmc_list.append(cmc)
@@ -235,40 +235,40 @@ def main():
     test_list=[2] #use set 1-10 for test (total 20)
     caffe.set_device(int(sys.argv[1]))
     caffe.set_mode_gpu()
-    map_lomo = {}
-    map_lomo['flag'] = True
-    map_lomo['data_dir'] = 'data/'
-    map_lomo['lomo_dir'] = 'lomo_test/'
-    map_lomo['block_size'] =  8
-    map_lomo['block_step'] =  4
-    map_lomo['bin_size'] =  8
-    map_lomo['pad_size'] =  2
-    map_lomo['tau'] =  0.3
-    map_lomo['R'] = 5
-    map_lomo['numPoints'] = 4
-    map_lomo['RGB_para'] = [True, 8]
-    map_lomo['HSV_para'] = [True, 8]
-    map_lomo['SILTP_para'] = [True, 16]
+    map_ctm = {}
+    map_ctm['flag'] = True
+    map_ctm['data_dir'] = 'data/'
+    map_ctm['ctm_dir'] = 'ctm_test/'
+    map_ctm['block_size'] =  8
+    map_ctm['block_step'] =  4
+    map_ctm['bin_size'] =  8
+    map_ctm['pad_size'] =  2
+    map_ctm['tau'] =  0.3
+    map_ctm['R'] = 5
+    map_ctm['numPoints'] = 4
+    map_ctm['RGB_para'] = [True, 8]
+    map_ctm['HSV_para'] = [True, 8]
+    map_ctm['SILTP_para'] = [True, 16]
 
     CMC_DIC = {}
     for iter_num in range(2000, 20000, 2000):
         cmc_list=[]
         for set_no in test_list:
             #init net
-            MODEL_FILE = './experiments_py_lomo/cuhk03/lomo_assp_fusion/deploy_twoflow_fusion.prototxt'
-            PRETRAINED = './models/lomo/cuhk03/lomo_assp_fusion/20000_set02_iter_%d.caffemodel'%iter_num#30000_set02_v2_all_iter_%d.caffemodel'%iter_num
+            MODEL_FILE = './experiments/cuhk03/mc_ppmn/deploy_mc_ppmn.prototxt'
+            PRETRAINED = './models/ctm/cuhk03/mc_ppmn/20000_set02_iter_%d.caffemodel'%iter_num#30000_set02_v2_all_iter_%d.caffemodel'%iter_num
             net = None
             net = caffe.Classifier(MODEL_FILE, PRETRAINED,caffe.TEST)
             #caculate CMC
-            cmc=calCMC(net,set_no,map_lomo,deep=True,rand_times=50)
+            cmc=calCMC(net,set_no,map_ctm,deep=True,rand_times=50)
             cmc_list.append(cmc)
         cmc_all=np.average(cmc_list,axis=0)
         print('\nCMC from rank 1 to rank %d:'%(len(cmc_all)))
         print(cmc_all)
         
-        CMC_DIC['single_yaqing_%d'%iter_num] = cmc_all
+        CMC_DIC['iter_%d'%iter_num] = cmc_all
         
-    save_root = 'experiments_py_lomo/cuhk03/lomo_assp_fusion/CMC_test/'
+    save_root = 'experiments/cuhk03/mc_ppmn/CMC_test/'
     save_mat_path = save_root + 'cuhk03_set02_yqCMC_100round_20000_fusion.mat'
     import scipy.io as sio
     sio.savemat(save_mat_path,{'ours':CMC_DIC})

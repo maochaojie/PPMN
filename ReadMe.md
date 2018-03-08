@@ -2,4 +2,4 @@
 
 ## The caffemodel for cuhk03:
 
-### -- mc_ppmn: 
+### -- mc_ppmn: https://pan.baidu.com/s/1fNDiZVT3Lcorr8HmDIotSQ
